@@ -26,8 +26,8 @@ contract GLBR {
     }
 
     function transfer(address _to, uint256 _value) public returns (bool) {
-        require(_to != address(0), "Invalid address");
-        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
+        require(_to != address(0), "Недійсна адреса");
+        require(balanceOf[msg.sender] >= _value, "Недостатньо коштів");
 
         balanceOf[msg.sender] -= _value;
         balanceOf[_to] += _value;
@@ -44,5 +44,16 @@ contract GLBR {
     }
 
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-        require(_from != address(0), "Invalid address");
-        require(_to != address(0), "Invalid address");
+        require(_from != address(0), "Недійсна адреса");
+        require(_to != address(0), "Недійсна адреса");
+        require(balanceOf[_from] >= _value, "Недостатньо коштів на рахунку");
+        require(allowance[_from][msg.sender] >= _value, "Недостатньо дозволів");
+
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+
+        emit Transfer(_from, _to, _value);
+        return true;
+    }
+}
