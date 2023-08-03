@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VotingToken {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public totalSupply;
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public reputationOf;
+    mapping(address => uint256) public votingCount;
+
+    uint256 public stakingPeriod; // Время стажа в блоках
+    uint256 public minVotingCount; // Минимальное количество голосований для повышения репутации
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event ReputationIncrease(address indexed voter, uint256 newReputation);
+
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint8 tokenDecimals,
+        uint256 initialSupply,
+        uint256 initialStakingPeriod,
+        uint256 initialMinVotingCount
+    ) {
+        name = tokenName;
+        symbol = tokenSymbol;
+        decimals = tokenDecimals;
+        totalSupply = initialSupply * 10**uint256(tokenDecimals);
+        balanceOf[msg.sender] = totalSupply;
+        stakingPeriod = initialStakingPeriod;
+        minVotingCount = initialMinVotingCount;
+    }
+
+    function transfer(address to, uint256 value) public returns (bool success) {
+        require(to != address(0), "Invalid address");
+        require(value > 0, "Value must be greater than 0");
+        require(balanceOf[msg.sender] >= value, "Insufficient balance");
+
+        balanceOf[msg.sender] -= value;
+        balanceOf[to] += value;
+        emit Transfer(msg.sender, to, value);
+
+        if (votingCount[msg.sender] >= minVotingCount) {
+            reputationOf[msg.sender]++;
+            emit ReputationIncrease(msg.sender, reputationOf[msg.sender]);
+        }
+
+        return true;
+    }
+
+    function getReputation(address voter) public view returns (uint256) {
+        return reputationOf[voter];
+    }
+
+    // Вспомогательная функция для стажировки
+    function stakeTokens() public {
+        // Здесь можно реализовать логику для стажировки токенов
+        // Например, блокировать токены на определенное время и т. д.
+        // Здесь представлен простой пример для демонстрации концепции
+        require(balanceOf[msg.sender] > 0, "Insufficient balance");
+        reputationOf[msg.sender]++;
+    }
+}
