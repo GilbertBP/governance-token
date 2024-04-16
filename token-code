@@ -8,17 +8,14 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 contract MyToken is ERC20, ERC20Permit, ERC20Votes {
     constructor() ERC20("MyToken", "MTK") ERC20Permit("MyToken") {}
 
-    // The functions below are overrides required by Solidity.
-
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
-        super._afterTokenTransfer(from, to, amount);
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Permit, ERC20Votes) {
+        super._beforeTokenTransfer(from, to, amount);
     }
 
-    function _mint(address to, uint256 amount) internal override(ERC20, ERC20Votes) {
-        super._mint(to, amount);
+    // Permit function from ERC20Permit
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        _permit(owner, spender, value, deadline, v, r, s);
     }
 
-    function _burn(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
-        super._burn(account, amount);
-    }
-}
+    // Vote functions from ERC20Votes
+    function _mint(address to, uint256 amount) internal override(ERC20, ERC
